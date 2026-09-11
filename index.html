@@ -10,7 +10,6 @@
     --bg: #08080a;
     --fg: #f0f0f5;
     --muted: #8a8a96;
-    --muted-2: #5a5a66;
     --card: #131318;
     --card-hover: #1a1a22;
     --border: #26262e;
@@ -63,18 +62,16 @@
     animation: fadeUp 0.8s 0.15s ease both;
   }
 
-  /* Sign-in wrap */
-  #signin-wrap {
-    animation: fadeUp 0.8s 0.3s ease both;
-    display: flex; justify-content: center;
-  }
+  /* Stage containers — only one visible at a time */
+  .stage { display: none; width: 100%; flex-direction: column; align-items: center; }
+  .stage.active { display: flex; animation: fadeUp 0.6s ease both; }
 
-  /* Fallback button (shown if Google button fails to load) */
+  /* Get Started button (stage 1) */
   .btn {
     display: inline-flex; align-items: center; gap: 10px;
-    padding: 15px 36px;
+    padding: 16px 40px;
     border-radius: 14px;
-    font-size: 15px; font-weight: 700;
+    font-size: 16px; font-weight: 700;
     background: linear-gradient(135deg, var(--accent), var(--accent-2));
     color: #fff;
     box-shadow: 0 8px 32px rgba(90, 130, 255, 0.4);
@@ -85,8 +82,16 @@
   .btn:hover { transform: translateY(-3px); box-shadow: 0 14px 44px rgba(90, 130, 255, 0.6); }
   .btn:active { transform: translateY(-1px); }
 
-  /* Signed-in card */
-  #signed-in { display: none; animation: fadeUp 0.5s ease both; }
+  /* Google button container (stage 2) */
+  .google-wrap {
+    display: flex; flex-direction: column; align-items: center; gap: 18px;
+  }
+  .google-hint {
+    font-size: 12.5px; color: var(--muted);
+    letter-spacing: 0.3px;
+  }
+
+  /* Signed-in card (stage 3) */
   .user-card {
     display: inline-flex; align-items: center; gap: 14px;
     padding: 12px 20px;
@@ -105,21 +110,14 @@
   }
   .signout:hover { text-decoration: underline; }
 
-  /* Section tiles */
+  /* Platform tiles (stage 3) */
   .platforms {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 18px;
     width: 100%;
     max-width: 660px;
-    margin-top: 56px;
-    animation: fadeUp 0.8s 0.45s ease both;
-    transition: margin-top 0.3s;
-  }
-  .platforms.locked {
-    filter: blur(6px);
-    opacity: 0.35;
-    pointer-events: none;
+    margin-top: 40px;
   }
   .platform {
     background: var(--card);
@@ -128,15 +126,8 @@
     padding: 34px 26px;
     text-align: left;
     transition: transform 0.3s cubic-bezier(.2,.8,.2,1), border-color 0.3s, background 0.3s, box-shadow 0.3s;
-    position: relative;
-    overflow: hidden;
     cursor: pointer;
     display: block;
-  }
-  .platform::after {
-    content: ''; position: absolute; inset: 0;
-    background: radial-gradient(circle at 50% 0%, rgba(90,130,255,0.12), transparent 60%);
-    opacity: 0; transition: opacity 0.3s; pointer-events: none;
   }
   .platform:hover {
     transform: translateY(-6px);
@@ -144,8 +135,6 @@
     background: var(--card-hover);
     box-shadow: 0 24px 48px rgba(0,0,0,0.5);
   }
-  .platform:hover::after { opacity: 1; }
-
   .platform-icon {
     width: 52px; height: 52px;
     border-radius: 14px;
@@ -155,7 +144,7 @@
     font-size: 24px;
     margin-bottom: 18px;
   }
-  .platform h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.3px; }
+  .platform h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
   .platform p { font-size: 13.5px; color: var(--muted); line-height: 1.55; }
   .platform-arrow {
     display: inline-flex; align-items: center; gap: 6px;
@@ -171,7 +160,6 @@
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* Mobile */
   @media (max-width: 560px) {
     .platforms { grid-template-columns: 1fr; }
     .platform { padding: 26px 22px; }
@@ -189,27 +177,33 @@
 <div class="logo">ORGANIX</div>
 <p class="sub">All apps that are essential for PC / Mobile available here.</p>
 
-<!-- ============ SIGN IN AREA ============ -->
-<!-- Shown before sign in -->
-<div id="signin-wrap">
-  <!-- Google's official button (loads if Client ID is set) -->
-  <div id="g_id_onload"
-       data-client_id="PASTE_YOUR_GOOGLE_CLIENT_ID_HERE.apps.googleusercontent.com"
-       data-callback="handleCredentialResponse"
-       data-auto_prompt="false">
-  </div>
-  <div class="g_id_signin"
-       data-type="standard"
-       data-size="large"
-       data-theme="filled_black"
-       data-text="continue_with"
-       data-shape="pill"
-       data-logo_alignment="left">
+<!-- ============ STAGE 1: Get Started ============ -->
+<div class="stage active" id="stage-1">
+  <button class="btn" onclick="showGoogle()">Get Started →</button>
+</div>
+
+<!-- ============ STAGE 2: Google Sign-In ============ -->
+<div class="stage" id="stage-2">
+  <div class="google-wrap">
+    <div id="g_id_onload"
+         data-client_id="PASTE_YOUR_GOOGLE_CLIENT_ID_HERE.apps.googleusercontent.com"
+         data-callback="handleCredentialResponse"
+         data-auto_prompt="false">
+    </div>
+    <div class="g_id_signin"
+         data-type="standard"
+         data-size="large"
+         data-theme="filled_black"
+         data-text="continue_with"
+         data-shape="pill"
+         data-logo_alignment="left">
+    </div>
+    <div class="google-hint">Sign in with your Google account to continue</div>
   </div>
 </div>
 
-<!-- Shown after sign in -->
-<div id="signed-in">
+<!-- ============ STAGE 3: Signed In + Files ============ -->
+<div class="stage" id="stage-3">
   <div class="user-card">
     <img id="u-avatar" src="" alt="" referrerpolicy="no-referrer">
     <div class="u-text">
@@ -218,75 +212,80 @@
     </div>
     <span class="signout" onclick="signOut()">Sign out</span>
   </div>
-</div>
 
-<!-- ============ PLATFORM TILES (blurred until sign-in) ============ -->
-<div class="platforms locked" id="platforms">
-  <a href="#" class="platform" data-platform="pc">
-    <div class="platform-icon">💻</div>
-    <h3>PC</h3>
-    <p>Essential desktop software — tools, utilities, and everything for Windows.</p>
-    <span class="platform-arrow">Browse →</span>
-  </a>
-  <a href="#" class="platform" data-platform="mobile">
-    <div class="platform-icon">📱</div>
-    <h3>Mobile</h3>
-    <p>Apps for Android and iOS — the essentials you actually need.</p>
-    <span class="platform-arrow">Browse →</span>
-  </a>
+  <div class="platforms">
+    <a href="#" class="platform" data-platform="pc">
+      <div class="platform-icon">💻</div>
+      <h3>PC</h3>
+      <p>Essential desktop software — tools, utilities, and everything for Windows.</p>
+      <span class="platform-arrow">Browse →</span>
+    </a>
+    <a href="#" class="platform" data-platform="mobile">
+      <div class="platform-icon">📱</div>
+      <h3>Mobile</h3>
+      <p>Apps for Android and iOS — the essentials you actually need.</p>
+      <span class="platform-arrow">Browse →</span>
+    </a>
+  </div>
 </div>
 
 <script>
-  // ============ GOOGLE SIGN-IN ============
+  // ============ STAGE CONTROL ============
+  function showStage(n) {
+    document.querySelectorAll('.stage').forEach((el, i) => {
+      el.classList.toggle('active', i === n - 1);
+    });
+  }
+
+  function showGoogle() {
+    showStage(2);
+    // Re-render the Google button (it must be initialized after being shown)
+    if (window.google && google.accounts && google.accounts.id) {
+      google.accounts.id.renderButton(
+        document.querySelector('.g_id_signin'),
+        { theme: 'filled_black', size: 'large', text: 'continue_with', shape: 'pill', logo_alignment: 'left' }
+      );
+    } else {
+      // Fallback message if Google lib didn't load
+      document.querySelector('.g_id_signin').innerHTML =
+        '<button class="btn" onclick="alert(\'Google sign-in is loading... please wait a moment and click again.\')">Continue with Google →</button>';
+    }
+  }
+
+  // ============ GOOGLE CALLBACK ============
   function handleCredentialResponse(response) {
-    // Decode the JWT payload (middle base64 segment)
     const payload = JSON.parse(atob(response.credential.split('.')[1]));
 
-    // Swap UI: hide sign-in, show user card, unlock tiles
-    document.getElementById('signin-wrap').style.display = 'none';
-    document.getElementById('signed-in').style.display = 'block';
-    document.getElementById('platforms').classList.remove('locked');
-
-    // Fill in user info
     document.getElementById('u-avatar').src = payload.picture || '';
     document.getElementById('u-name').textContent = payload.name || 'User';
     document.getElementById('u-email').textContent = payload.email || '';
 
-    // Remember for this browser tab session
     sessionStorage.setItem('organix_user', JSON.stringify({
       name: payload.name,
       email: payload.email,
       picture: payload.picture
     }));
+
+    showStage(3);
   }
 
   function signOut() {
     sessionStorage.removeItem('organix_user');
-    location.reload();
+    if (window.google && google.accounts && google.accounts.id) {
+      google.accounts.id.disableAutoSelect();
+    }
+    showStage(1);
   }
 
-  // ============ RESTORE SESSION ON LOAD ============
+  // ============ RESTORE SESSION ============
   window.addEventListener('load', () => {
-    // If the Google button didn't render (no Client ID set), show a plain fallback
-    setTimeout(() => {
-      const gbtn = document.querySelector('.g_id_signin');
-      if (gbtn && gbtn.innerHTML.trim() === '' && !sessionStorage.getItem('organix_user')) {
-        // Google button failed to load — replace with a message
-        document.getElementById('signin-wrap').innerHTML =
-          '<button class="btn" onclick="alert(\'Google sign-in needs a Client ID. Add it in the code.\')">Continue with Google →</button>';
-      }
-    }, 1500);
-
-    // If user already signed in this session, restore the signed-in view
     const saved = sessionStorage.getItem('organix_user');
     if (saved) {
       const u = JSON.parse(saved);
-      document.getElementById('signin-wrap').style.display = 'none';
-      document.getElementById('signed-in').style.display = 'block';
-      document.getElementById('platforms').classList.remove('locked');
       document.getElementById('u-avatar').src = u.picture || '';
       document.getElementById('u-name').textContent = u.name || 'User';
       document.getElementById('u-email').textContent = u.email || '';
+      showStage(3);
     }
   });
 
