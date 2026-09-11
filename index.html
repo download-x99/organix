@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ORGANIX</title>
+<title>Shayan</title>
 <style>
   :root {
     --bg: #08080a;
@@ -33,7 +33,6 @@
   a { color: inherit; text-decoration: none; }
   ::selection { background: rgba(90,130,255,0.35); color: #fff; }
 
-  /* Background blobs */
   .blobs { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
   .blob { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.35; }
   .blob-1 { width: 500px; height: 500px; background: #5a82ff; top: -150px; left: -150px; animation: float1 18s ease-in-out infinite; }
@@ -43,10 +42,9 @@
   @keyframes float2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-60px,80px) scale(0.9); } }
   @keyframes float3 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(60px,-80px) scale(1.15); } }
 
-  /* Logo */
   .logo {
-    font-size: clamp(56px, 13vw, 120px);
-    font-weight: 800; letter-spacing: -4px; line-height: 1;
+    font-size: clamp(48px, 11vw, 96px);
+    font-weight: 800; letter-spacing: -3px; line-height: 1;
     background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
     background-size: 200% auto;
     animation: shine 5s linear infinite, fadeUp 0.8s ease both;
@@ -56,27 +54,19 @@
   @keyframes shine { to { background-position: 200% center; } }
 
   .sub {
-    font-size: clamp(14px, 1.7vw, 17px);
+    font-size: clamp(13px, 1.6vw, 16px);
     color: var(--muted);
     max-width: 520px;
-    margin-bottom: 40px;
+    margin-bottom: 32px;
     animation: fadeUp 0.8s 0.15s ease both;
   }
 
-  /* Stage system */
   .stage { display: none; width: 100%; flex-direction: column; align-items: center; }
   .stage.active { display: flex; animation: fadeUp 0.5s ease both; }
 
-  /* Gate */
-  .gate {
-    display: flex; flex-direction: column; align-items: center; gap: 14px;
-    width: 100%; max-width: 420px;
-  }
-  .gate-label { font-size: 14px; font-weight: 600; color: var(--fg); letter-spacing: 0.2px; }
-  .gate-hint { font-size: 12px; color: var(--muted); margin-top: -6px; }
-  .gate-row { display: flex; gap: 10px; width: 100%; }
-  .gate-input {
-    flex: 1;
+  .auth { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 380px; }
+  .auth-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+  .auth-input {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 12px;
@@ -86,12 +76,13 @@
     font-family: inherit;
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
   }
-  .gate-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(90,130,255,0.15); }
-  .gate-input::placeholder { color: var(--muted); }
-  .gate-input.error { border-color: var(--err); box-shadow: 0 0 0 3px rgba(255,85,102,0.15); }
+  .auth-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(90,130,255,0.15); }
+  .auth-input::placeholder { color: var(--muted); }
+  .auth-input.error { border-color: var(--err); box-shadow: 0 0 0 3px rgba(255,85,102,0.15); }
 
-  .gate-btn {
+  .auth-btn {
     padding: 14px 24px;
     border-radius: 12px;
     font-size: 14px; font-weight: 700;
@@ -101,51 +92,19 @@
     cursor: pointer;
     box-shadow: 0 6px 20px rgba(90,130,255,0.35);
     transition: transform 0.2s, box-shadow 0.2s;
+    width: 100%;
   }
-  .gate-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(90,130,255,0.5); }
-  .gate-btn:active { transform: translateY(0); }
+  .auth-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(90,130,255,0.5); }
+  .auth-btn:active { transform: translateY(0); }
 
-  .gate-msg { font-size: 12.5px; min-height: 18px; color: var(--err); transition: opacity 0.2s; }
-  .gate-msg.ok { color: var(--ok); }
+  .auth-msg { font-size: 12.5px; min-height: 18px; color: var(--err); margin-top: 2px; }
+  .auth-msg.ok { color: var(--ok); }
 
-  /* Welcome overlay */
-  #welcome-overlay {
-    position: fixed; inset: 0; z-index: 999;
-    background: var(--bg);
-    display: none;
-    flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 20px;
-    animation: fadeIn 0.3s ease both;
-  }
-  #welcome-overlay.active { display: flex; }
-  #welcome-overlay .welcome-text {
-    font-size: clamp(28px, 6vw, 56px);
-    font-weight: 800;
-    letter-spacing: -1.5px;
-    background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
-    background-size: 200% auto;
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-    animation: shine 3s linear infinite;
-  }
-  #welcome-overlay .check {
-    width: 64px; height: 64px;
-    border-radius: 50%;
-    background: rgba(80,200,120,0.15);
-    border: 2px solid var(--ok);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 32px;
-    color: var(--ok);
-    animation: pop 0.5s cubic-bezier(.2,.8,.2,1) both;
-  }
-  @keyframes pop {
-    0% { transform: scale(0); opacity: 0; }
-    60% { transform: scale(1.15); }
-    100% { transform: scale(1); opacity: 1; }
-  }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .auth-switch { font-size: 13px; color: var(--muted); margin-top: 14px; }
+  .auth-switch a { color: var(--accent); font-weight: 600; cursor: pointer; }
+  .auth-switch a:hover { text-decoration: underline; }
 
-  /* Content */
+  /* Dashboard */
   .user-badge {
     display: inline-flex; align-items: center; gap: 10px;
     padding: 10px 18px;
@@ -154,11 +113,7 @@
     border-radius: 999px;
     margin-bottom: 30px;
   }
-  .user-badge .dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--ok);
-    box-shadow: 0 0 10px var(--ok);
-  }
+  .user-badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 10px var(--ok); }
   .user-badge .name { font-size: 13.5px; font-weight: 700; }
   .user-badge .signout {
     font-size: 12px; color: var(--accent);
@@ -219,8 +174,6 @@
   @media (max-width: 560px) {
     .platforms { grid-template-columns: 1fr; }
     .platform { padding: 26px 22px; }
-    .gate-row { flex-direction: column; }
-    .gate-btn { width: 100%; }
   }
 </style>
 </head>
@@ -232,30 +185,41 @@
   <div class="blob blob-3"></div>
 </div>
 
-<div class="logo">ORGANIX</div>
-<p class="sub">All apps that are essential for PC / Mobile available here.</p>
+<div class="logo">Shayan</div>
+<p class="sub">Register or sign in to access the files.</p>
 
-<!-- ============ STAGE 1: Discord username gate ============ -->
-<div class="stage active" id="stage-1">
-  <div class="gate">
-    <div class="gate-label">Enter your Discord username</div>
-    <div class="gate-hint">You must be a member to access the files</div>
-    <div class="gate-row">
-      <input type="text" class="gate-input" id="discord-input" placeholder="username" autocomplete="off" spellcheck="false">
-      <button class="gate-btn" onclick="verifyDiscord()">Enter</button>
-    </div>
-    <div class="gate-msg" id="gate-msg"></div>
+<!-- ============ STAGE 1: Login ============ -->
+<div class="stage active" id="stage-login">
+  <div class="auth">
+    <div class="auth-title">Sign in</div>
+    <input type="text" class="auth-input" id="login-user" placeholder="Username" autocomplete="off" spellcheck="false">
+    <input type="password" class="auth-input" id="login-pass" placeholder="Password" autocomplete="off">
+    <button class="auth-btn" onclick="doLogin()">Sign in</button>
+    <div class="auth-msg" id="login-msg"></div>
+    <div class="auth-switch">No account? <a onclick="showStage('register')">Register</a></div>
   </div>
 </div>
 
-<!-- ============ STAGE 2: Content (after gate) ============ -->
-<div class="stage" id="stage-2">
+<!-- ============ STAGE 2: Register ============ -->
+<div class="stage" id="stage-register">
+  <div class="auth">
+    <div class="auth-title">Create account</div>
+    <input type="text" class="auth-input" id="reg-user" placeholder="Choose a username" autocomplete="off" spellcheck="false">
+    <input type="password" class="auth-input" id="reg-pass" placeholder="Choose a password" autocomplete="off">
+    <input type="password" class="auth-input" id="reg-pass2" placeholder="Confirm password" autocomplete="off">
+    <button class="auth-btn" onclick="doRegister()">Create account</button>
+    <div class="auth-msg" id="reg-msg"></div>
+    <div class="auth-switch">Already have an account? <a onclick="showStage('login')">Sign in</a></div>
+  </div>
+</div>
+
+<!-- ============ STAGE 3: Dashboard ============ -->
+<div class="stage" id="stage-dashboard">
   <div class="user-badge">
     <span class="dot"></span>
-    <span class="name" id="badge-name"></span>
-    <span class="signout" onclick="signOut()">change</span>
+    <span class="name" id="dash-name"></span>
+    <span class="signout" onclick="doLogout()">Sign out</span>
   </div>
-
   <div class="platforms">
     <a href="PASTE_YOUR_PC_DRIVE_LINK_HERE" class="platform" target="_blank">
       <div class="platform-icon">💻</div>
@@ -272,86 +236,184 @@
   </div>
 </div>
 
-<!-- ============ Welcome overlay ============ -->
-<div id="welcome-overlay">
-  <div class="check">✓</div>
-  <div class="welcome-text" id="welcome-text">Welcome</div>
-</div>
-
 <script>
-  // ============ STAGE CONTROL ============
-  function showStage(n) {
-    document.querySelectorAll('.stage').forEach((el, i) => {
-      el.classList.toggle('active', i === n - 1);
+  // ============ STORAGE WITH FALLBACK ============
+  // If localStorage is blocked (private mode, file://, etc), use in-memory storage.
+  // In-memory works for the current page session only.
+
+  const USERS_KEY = 'shayan_users';
+  const SESSION_KEY = 'shayan_session';
+
+  // Detect if localStorage works
+  let storageOK = false;
+  try {
+    localStorage.setItem('__test__', '1');
+    localStorage.removeItem('__test__');
+    storageOK = true;
+  } catch (e) {
+    storageOK = false;
+    console.warn('localStorage blocked — using in-memory storage for this session.');
+  }
+
+  // In-memory fallback
+  const memoryStore = {};
+
+  function storeGet(key) {
+    if (storageOK) {
+      try { return localStorage.getItem(key); } catch { return memoryStore[key] || null; }
+    }
+    return memoryStore[key] || null;
+  }
+  function storeSet(key, val) {
+    if (storageOK) {
+      try { localStorage.setItem(key, val); return; } catch { /* fall through */ }
+    }
+    memoryStore[key] = val;
+  }
+  function storeRemove(key) {
+    if (storageOK) {
+      try { localStorage.removeItem(key); return; } catch { /* fall through */ }
+    }
+    delete memoryStore[key];
+  }
+
+  function loadUsers() {
+    const raw = storeGet(USERS_KEY);
+    if (!raw) return {};
+    try { return JSON.parse(raw) || {}; }
+    catch { return {}; }
+  }
+  function saveUsers(u) {
+    storeSet(USERS_KEY, JSON.stringify(u));
+  }
+
+  // ============ STAGE SWITCHER ============
+  function showStage(name) {
+    document.querySelectorAll('.stage').forEach(s => s.classList.remove('active'));
+    document.getElementById('stage-' + name).classList.add('active');
+
+    document.getElementById('login-msg').textContent = '';
+    document.getElementById('reg-msg').textContent = '';
+
+    // Clear only passwords; keep usernames
+    ['login-pass', 'reg-pass', 'reg-pass2'].forEach(id => {
+      const el = document.getElementById(id);
+      el.value = '';
+      el.classList.remove('error');
+    });
+    ['login-user', 'reg-user'].forEach(id => {
+      document.getElementById(id).classList.remove('error');
     });
   }
 
-  // ============ DISCORD GATE ============
-  function isDiscordFormat(name) {
-    if (!name) return false;
-    const re = /^(?!\.)(?!.*\.$)[a-z0-9._]{2,32}$/i;
-    return re.test(name);
-  }
-
-  function verifyDiscord() {
-    const input = document.getElementById('discord-input');
-    const msg = document.getElementById('gate-msg');
-    const name = input.value.trim();
-
-    input.classList.remove('error');
+  // ============ REGISTER ============
+  function doRegister() {
+    const userEl = document.getElementById('reg-user');
+    const u = userEl.value.trim();
+    const p = document.getElementById('reg-pass').value;
+    const p2 = document.getElementById('reg-pass2').value;
+    const msg = document.getElementById('reg-msg');
     msg.classList.remove('ok');
-    msg.textContent = '';
 
-    if (!name) {
-      input.classList.add('error');
-      msg.textContent = 'Please enter a username.';
+    userEl.classList.remove('error');
+    document.getElementById('reg-pass').classList.remove('error');
+    document.getElementById('reg-pass2').classList.remove('error');
+
+    if (!u || !p || !p2) { msg.textContent = 'Fill in all fields.'; return; }
+    if (u.length < 3) { msg.textContent = 'Username must be at least 3 characters.'; userEl.classList.add('error'); return; }
+    if (p.length < 4) { msg.textContent = 'Password must be at least 4 characters.'; document.getElementById('reg-pass').classList.add('error'); return; }
+    if (p !== p2) { msg.textContent = 'Passwords do not match.'; document.getElementById('reg-pass2').classList.add('error'); return; }
+
+    const users = loadUsers();
+    const key = u.toLowerCase();
+
+    if (users[key]) {
+      msg.textContent = 'That username already exists. Try another.';
+      userEl.classList.add('error');
       return;
     }
-    if (!isDiscordFormat(name)) {
-      input.classList.add('error');
-      msg.textContent = 'That does not look like a valid Discord username.';
-      return;
-    }
 
-    // Save for session
-    sessionStorage.setItem('organix_discord', name);
+    users[key] = { name: u, pass: p };
+    saveUsers(users);
 
-    // Show welcome overlay
-    showWelcome(name);
-  }
+    // Debug
+    console.log('Saved user:', key);
+    console.log('Users now:', loadUsers());
 
-  function showWelcome(name) {
-    const overlay = document.getElementById('welcome-overlay');
-    const text = document.getElementById('welcome-text');
-    text.textContent = 'Welcome, ' + name;
-    overlay.classList.add('active');
+    msg.classList.add('ok');
+    msg.textContent = 'Registered successfully! You can now sign in.';
 
-    // After 1.6 seconds: hide overlay, hide gate, show content
+    document.getElementById('reg-user').value = '';
+    document.getElementById('reg-pass').value = '';
+    document.getElementById('reg-pass2').value = '';
+
     setTimeout(() => {
-      overlay.classList.remove('active');
-      document.getElementById('badge-name').textContent = name;
-      showStage(2);
-    }, 1600);
+      showStage('login');
+      document.getElementById('login-user').value = u;
+      document.getElementById('login-pass').focus();
+    }, 1400);
   }
 
-  function signOut() {
-    sessionStorage.removeItem('organix_discord');
-    document.getElementById('discord-input').value = '';
-    document.getElementById('gate-msg').textContent = '';
-    showStage(1);
+  // ============ LOGIN ============
+  function doLogin() {
+    const u = document.getElementById('login-user').value.trim();
+    const p = document.getElementById('login-pass').value;
+    const msg = document.getElementById('login-msg');
+
+    document.getElementById('login-user').classList.remove('error');
+    document.getElementById('login-pass').classList.remove('error');
+
+    if (!u || !p) { msg.textContent = 'Fill in both fields.'; return; }
+
+    const users = loadUsers();
+    const key = u.toLowerCase();
+
+    console.log('Login attempt:', key);
+    console.log('Available users:', Object.keys(users));
+
+    const record = users[key];
+
+    if (!record) {
+      msg.textContent = 'No account with that username. Register first.';
+      document.getElementById('login-user').classList.add('error');
+      return;
+    }
+    if (record.pass !== p) {
+      msg.textContent = 'Wrong password.';
+      document.getElementById('login-pass').classList.add('error');
+      return;
+    }
+
+    loginSuccess(record.name);
   }
 
-  // ============ ENTER KEY + RESTORE ============
-  document.getElementById('discord-input').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') verifyDiscord();
-  });
+  // ============ SUCCESS ============
+  function loginSuccess(name) {
+    storeSet(SESSION_KEY, name);
+    document.getElementById('dash-name').textContent = name;
+    showStage('dashboard');
+  }
 
-  // On page load: if they already entered a name this session, skip the gate
+  function doLogout() {
+    storeRemove(SESSION_KEY);
+    showStage('login');
+  }
+
+  // ============ ENTER KEYS ============
+  document.getElementById('login-user').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('login-pass').focus(); });
+  document.getElementById('login-pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  document.getElementById('reg-user').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('reg-pass').focus(); });
+  document.getElementById('reg-pass').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('reg-pass2').focus(); });
+  document.getElementById('reg-pass2').addEventListener('keydown', e => { if (e.key === 'Enter') doRegister(); });
+
+  // ============ RESTORE SESSION ON LOAD ============
   window.addEventListener('load', () => {
-    const saved = sessionStorage.getItem('organix_discord');
+    const saved = storeGet(SESSION_KEY);
     if (saved) {
-      document.getElementById('badge-name').textContent = saved;
-      showStage(2);
+      document.getElementById('dash-name').textContent = saved;
+      showStage('dashboard');
+    } else {
+      showStage('login');
     }
   });
 </script>
