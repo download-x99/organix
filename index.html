@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ORGANIX</title>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root {
     --bg: #08080a;
@@ -16,6 +15,8 @@
     --accent: #5a82ff;
     --accent-2: #9d6bff;
     --accent-3: #ff6b9d;
+    --ok: #50c878;
+    --err: #ff5566;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -62,62 +63,117 @@
     animation: fadeUp 0.8s 0.15s ease both;
   }
 
-  /* Stage containers — only one visible at a time */
+  /* Stage system */
   .stage { display: none; width: 100%; flex-direction: column; align-items: center; }
-  .stage.active { display: flex; animation: fadeUp 0.6s ease both; }
+  .stage.active { display: flex; animation: fadeUp 0.5s ease both; }
 
-  /* Get Started button (stage 1) */
-  .btn {
-    display: inline-flex; align-items: center; gap: 10px;
-    padding: 16px 40px;
-    border-radius: 14px;
-    font-size: 16px; font-weight: 700;
+  /* Gate */
+  .gate {
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+    width: 100%; max-width: 420px;
+  }
+  .gate-label { font-size: 14px; font-weight: 600; color: var(--fg); letter-spacing: 0.2px; }
+  .gate-hint { font-size: 12px; color: var(--muted); margin-top: -6px; }
+  .gate-row { display: flex; gap: 10px; width: 100%; }
+  .gate-input {
+    flex: 1;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    color: var(--fg);
+    font-size: 15px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .gate-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(90,130,255,0.15); }
+  .gate-input::placeholder { color: var(--muted); }
+  .gate-input.error { border-color: var(--err); box-shadow: 0 0 0 3px rgba(255,85,102,0.15); }
+
+  .gate-btn {
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-size: 14px; font-weight: 700;
     background: linear-gradient(135deg, var(--accent), var(--accent-2));
     color: #fff;
-    box-shadow: 0 8px 32px rgba(90, 130, 255, 0.4);
-    transition: transform 0.25s, box-shadow 0.25s;
-    cursor: pointer;
     border: none; font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(90,130,255,0.35);
+    transition: transform 0.2s, box-shadow 0.2s;
   }
-  .btn:hover { transform: translateY(-3px); box-shadow: 0 14px 44px rgba(90, 130, 255, 0.6); }
-  .btn:active { transform: translateY(-1px); }
+  .gate-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(90,130,255,0.5); }
+  .gate-btn:active { transform: translateY(0); }
 
-  /* Google button container (stage 2) */
-  .google-wrap {
-    display: flex; flex-direction: column; align-items: center; gap: 18px;
-  }
-  .google-hint {
-    font-size: 12.5px; color: var(--muted);
-    letter-spacing: 0.3px;
-  }
+  .gate-msg { font-size: 12.5px; min-height: 18px; color: var(--err); transition: opacity 0.2s; }
+  .gate-msg.ok { color: var(--ok); }
 
-  /* Signed-in card (stage 3) */
-  .user-card {
-    display: inline-flex; align-items: center; gap: 14px;
-    padding: 12px 20px;
+  /* Welcome overlay */
+  #welcome-overlay {
+    position: fixed; inset: 0; z-index: 999;
+    background: var(--bg);
+    display: none;
+    flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 20px;
+    animation: fadeIn 0.3s ease both;
+  }
+  #welcome-overlay.active { display: flex; }
+  #welcome-overlay .welcome-text {
+    font-size: clamp(28px, 6vw, 56px);
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
+    background-size: 200% auto;
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: shine 3s linear infinite;
+  }
+  #welcome-overlay .check {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: rgba(80,200,120,0.15);
+    border: 2px solid var(--ok);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px;
+    color: var(--ok);
+    animation: pop 0.5s cubic-bezier(.2,.8,.2,1) both;
+  }
+  @keyframes pop {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.15); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* Content */
+  .user-badge {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 10px 18px;
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 999px;
-    margin-bottom: 8px;
+    margin-bottom: 30px;
   }
-  .user-card img { width: 36px; height: 36px; border-radius: 50%; }
-  .user-card .u-text { text-align: left; }
-  .user-card .u-name { font-weight: 700; font-size: 14px; }
-  .user-card .u-email { font-size: 12px; color: var(--muted); }
-  .signout {
-    margin-left: 12px; font-size: 12px; color: var(--accent);
-    cursor: pointer; font-weight: 600; user-select: none;
+  .user-badge .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--ok);
+    box-shadow: 0 0 10px var(--ok);
   }
-  .signout:hover { text-decoration: underline; }
+  .user-badge .name { font-size: 13.5px; font-weight: 700; }
+  .user-badge .signout {
+    font-size: 12px; color: var(--accent);
+    cursor: pointer; font-weight: 600;
+    margin-left: 6px;
+  }
+  .user-badge .signout:hover { text-decoration: underline; }
 
-  /* Platform tiles (stage 3) */
   .platforms {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 18px;
     width: 100%;
     max-width: 660px;
-    margin-top: 40px;
+    margin-top: 20px;
   }
   .platform {
     background: var(--card);
@@ -163,6 +219,8 @@
   @media (max-width: 560px) {
     .platforms { grid-template-columns: 1fr; }
     .platform { padding: 26px 22px; }
+    .gate-row { flex-direction: column; }
+    .gate-btn { width: 100%; }
   }
 </style>
 </head>
@@ -177,56 +235,47 @@
 <div class="logo">ORGANIX</div>
 <p class="sub">All apps that are essential for PC / Mobile available here.</p>
 
-<!-- ============ STAGE 1: Get Started ============ -->
+<!-- ============ STAGE 1: Discord username gate ============ -->
 <div class="stage active" id="stage-1">
-  <button class="btn" onclick="showGoogle()">Get Started →</button>
-</div>
-
-<!-- ============ STAGE 2: Google Sign-In ============ -->
-<div class="stage" id="stage-2">
-  <div class="google-wrap">
-    <div id="g_id_onload"
-         data-client_id="PASTE_YOUR_GOOGLE_CLIENT_ID_HERE.apps.googleusercontent.com"
-         data-callback="handleCredentialResponse"
-         data-auto_prompt="false">
+  <div class="gate">
+    <div class="gate-label">Enter your Discord username</div>
+    <div class="gate-hint">You must be a member to access the files</div>
+    <div class="gate-row">
+      <input type="text" class="gate-input" id="discord-input" placeholder="username" autocomplete="off" spellcheck="false">
+      <button class="gate-btn" onclick="verifyDiscord()">Enter</button>
     </div>
-    <div class="g_id_signin"
-         data-type="standard"
-         data-size="large"
-         data-theme="filled_black"
-         data-text="continue_with"
-         data-shape="pill"
-         data-logo_alignment="left">
-    </div>
-    <div class="google-hint">Sign in with your Google account to continue</div>
+    <div class="gate-msg" id="gate-msg"></div>
   </div>
 </div>
 
-<!-- ============ STAGE 3: Signed In + Files ============ -->
-<div class="stage" id="stage-3">
-  <div class="user-card">
-    <img id="u-avatar" src="" alt="" referrerpolicy="no-referrer">
-    <div class="u-text">
-      <div class="u-name" id="u-name"></div>
-      <div class="u-email" id="u-email"></div>
-    </div>
-    <span class="signout" onclick="signOut()">Sign out</span>
+<!-- ============ STAGE 2: Content (after gate) ============ -->
+<div class="stage" id="stage-2">
+  <div class="user-badge">
+    <span class="dot"></span>
+    <span class="name" id="badge-name"></span>
+    <span class="signout" onclick="signOut()">change</span>
   </div>
 
   <div class="platforms">
-    <a href="#" class="platform" data-platform="pc">
+    <a href="PASTE_YOUR_PC_DRIVE_LINK_HERE" class="platform" target="_blank">
       <div class="platform-icon">💻</div>
       <h3>PC</h3>
       <p>Essential desktop software — tools, utilities, and everything for Windows.</p>
       <span class="platform-arrow">Browse →</span>
     </a>
-    <a href="#" class="platform" data-platform="mobile">
+    <a href="PASTE_YOUR_MOBILE_DRIVE_LINK_HERE" class="platform" target="_blank">
       <div class="platform-icon">📱</div>
       <h3>Mobile</h3>
       <p>Apps for Android and iOS — the essentials you actually need.</p>
       <span class="platform-arrow">Browse →</span>
     </a>
   </div>
+</div>
+
+<!-- ============ Welcome overlay ============ -->
+<div id="welcome-overlay">
+  <div class="check">✓</div>
+  <div class="welcome-text" id="welcome-text">Welcome</div>
 </div>
 
 <script>
@@ -237,64 +286,73 @@
     });
   }
 
-  function showGoogle() {
-    showStage(2);
-    // Re-render the Google button (it must be initialized after being shown)
-    if (window.google && google.accounts && google.accounts.id) {
-      google.accounts.id.renderButton(
-        document.querySelector('.g_id_signin'),
-        { theme: 'filled_black', size: 'large', text: 'continue_with', shape: 'pill', logo_alignment: 'left' }
-      );
-    } else {
-      // Fallback message if Google lib didn't load
-      document.querySelector('.g_id_signin').innerHTML =
-        '<button class="btn" onclick="alert(\'Google sign-in is loading... please wait a moment and click again.\')">Continue with Google →</button>';
-    }
+  // ============ DISCORD GATE ============
+  function isDiscordFormat(name) {
+    if (!name) return false;
+    const re = /^(?!\.)(?!.*\.$)[a-z0-9._]{2,32}$/i;
+    return re.test(name);
   }
 
-  // ============ GOOGLE CALLBACK ============
-  function handleCredentialResponse(response) {
-    const payload = JSON.parse(atob(response.credential.split('.')[1]));
+  function verifyDiscord() {
+    const input = document.getElementById('discord-input');
+    const msg = document.getElementById('gate-msg');
+    const name = input.value.trim();
 
-    document.getElementById('u-avatar').src = payload.picture || '';
-    document.getElementById('u-name').textContent = payload.name || 'User';
-    document.getElementById('u-email').textContent = payload.email || '';
+    input.classList.remove('error');
+    msg.classList.remove('ok');
+    msg.textContent = '';
 
-    sessionStorage.setItem('organix_user', JSON.stringify({
-      name: payload.name,
-      email: payload.email,
-      picture: payload.picture
-    }));
+    if (!name) {
+      input.classList.add('error');
+      msg.textContent = 'Please enter a username.';
+      return;
+    }
+    if (!isDiscordFormat(name)) {
+      input.classList.add('error');
+      msg.textContent = 'That does not look like a valid Discord username.';
+      return;
+    }
 
-    showStage(3);
+    // Save for session
+    sessionStorage.setItem('organix_discord', name);
+
+    // Show welcome overlay
+    showWelcome(name);
+  }
+
+  function showWelcome(name) {
+    const overlay = document.getElementById('welcome-overlay');
+    const text = document.getElementById('welcome-text');
+    text.textContent = 'Welcome, ' + name;
+    overlay.classList.add('active');
+
+    // After 1.6 seconds: hide overlay, hide gate, show content
+    setTimeout(() => {
+      overlay.classList.remove('active');
+      document.getElementById('badge-name').textContent = name;
+      showStage(2);
+    }, 1600);
   }
 
   function signOut() {
-    sessionStorage.removeItem('organix_user');
-    if (window.google && google.accounts && google.accounts.id) {
-      google.accounts.id.disableAutoSelect();
-    }
+    sessionStorage.removeItem('organix_discord');
+    document.getElementById('discord-input').value = '';
+    document.getElementById('gate-msg').textContent = '';
     showStage(1);
   }
 
-  // ============ RESTORE SESSION ============
-  window.addEventListener('load', () => {
-    const saved = sessionStorage.getItem('organix_user');
-    if (saved) {
-      const u = JSON.parse(saved);
-      document.getElementById('u-avatar').src = u.picture || '';
-      document.getElementById('u-name').textContent = u.name || 'User';
-      document.getElementById('u-email').textContent = u.email || '';
-      showStage(3);
-    }
+  // ============ ENTER KEY + RESTORE ============
+  document.getElementById('discord-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') verifyDiscord();
   });
 
-  // ============ PLACEHOLDER TILE CLICKS ============
-  document.querySelectorAll('.platform[href="#"]').forEach(el => {
-    el.addEventListener('click', (e) => {
-      e.preventDefault();
-      alert('Coming soon — files are being prepared.');
-    });
+  // On page load: if they already entered a name this session, skip the gate
+  window.addEventListener('load', () => {
+    const saved = sessionStorage.getItem('organix_discord');
+    if (saved) {
+      document.getElementById('badge-name').textContent = saved;
+      showStage(2);
+    }
   });
 </script>
 
