@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ORGANIX</title>
+<style>
+  :root {
+    --bg: #08080a;
+    --fg: #f0f0f5;
+    --muted: #8a8a96;
+    --muted-2: #5a5a66;
+    --card: #131318;
+    --card-hover: #1a1a22;
+    --border: #26262e;
+    --accent: #5a82ff;
+    --accent-2: #9d6bff;
+    --accent-3: #ff6b9d;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    padding: 60px 24px;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  ::selection { background: rgba(90,130,255,0.35); color: #fff; }
+
+  /* Background blobs */
+  .blobs { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+  .blob { position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.35; }
+  .blob-1 { width: 500px; height: 500px; background: #5a82ff; top: -150px; left: -150px; animation: float1 18s ease-in-out infinite; }
+  .blob-2 { width: 450px; height: 450px; background: #9d6bff; top: 30%; right: -150px; animation: float2 22s ease-in-out infinite; }
+  .blob-3 { width: 400px; height: 400px; background: #ff6b9d; bottom: -100px; left: 30%; animation: float3 20s ease-in-out infinite; }
+  @keyframes float1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(80px,60px) scale(1.1); } }
+  @keyframes float2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-60px,80px) scale(0.9); } }
+  @keyframes float3 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(60px,-80px) scale(1.15); } }
+
+  /* Logo */
+  .logo {
+    font-size: clamp(56px, 13vw, 120px);
+    font-weight: 800; letter-spacing: -4px; line-height: 1;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
+    background-size: 200% auto;
+    animation: shine 5s linear infinite, fadeUp 0.8s ease both;
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    margin-bottom: 18px;
+  }
+  @keyframes shine { to { background-position: 200% center; } }
+
+  .sub {
+    font-size: clamp(14px, 1.7vw, 17px);
+    color: var(--muted);
+    max-width: 520px;
+    margin-bottom: 40px;
+    animation: fadeUp 0.8s 0.15s ease both;
+  }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 15px 36px;
+    border-radius: 14px;
+    font-size: 15px; font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    box-shadow: 0 8px 32px rgba(90, 130, 255, 0.4);
+    transition: transform 0.25s, box-shadow 0.25s;
+    animation: fadeUp 0.8s 0.3s ease both;
+    cursor: pointer;
+  }
+  .btn:hover { transform: translateY(-3px); box-shadow: 0 14px 44px rgba(90, 130, 255, 0.6); }
+  .btn:active { transform: translateY(-1px); }
+
+  /* Section tiles */
+  .platforms {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    width: 100%;
+    max-width: 660px;
+    margin-top: 56px;
+    animation: fadeUp 0.8s 0.45s ease both;
+  }
+  .platform {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 34px 26px;
+    text-align: left;
+    transition: transform 0.3s cubic-bezier(.2,.8,.2,1), border-color 0.3s, background 0.3s, box-shadow 0.3s;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    display: block;
+  }
+  .platform::after {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(90,130,255,0.12), transparent 60%);
+    opacity: 0; transition: opacity 0.3s; pointer-events: none;
+  }
+  .platform:hover {
+    transform: translateY(-6px);
+    border-color: #33333d;
+    background: var(--card-hover);
+    box-shadow: 0 24px 48px rgba(0,0,0,0.5);
+  }
+  .platform:hover::after { opacity: 1; }
+
+  .platform-icon {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(90,130,255,0.18), rgba(157,107,255,0.18));
+    border: 1px solid rgba(90,130,255,0.22);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    margin-bottom: 18px;
+  }
+  .platform h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: -0.3px;
+  }
+  .platform p {
+    font-size: 13.5px;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+  .platform-arrow {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 16px;
+    font-size: 13px; font-weight: 600;
+    color: var(--accent);
+    transition: gap 0.2s;
+  }
+  .platform:hover .platform-arrow { gap: 12px; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Mobile */
+  @media (max-width: 560px) {
+    .platforms { grid-template-columns: 1fr; }
+    .platform { padding: 26px 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="blobs">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
+
+<div class="logo">ORGANIX</div>
+<p class="sub">All apps that are essential for PC / Mobile available here.</p>
+<a href="#" class="btn">Get Started →</a>
+
+<div class="platforms">
+  <a href="#" class="platform" data-platform="pc">
+    <div class="platform-icon">💻</div>
+    <h3>PC</h3>
+    <p>Essential desktop software — tools, utilities, and everything for Windows.</p>
+    <span class="platform-arrow">Browse →</span>
+  </a>
+  <a href="#" class="platform" data-platform="mobile">
+    <div class="platform-icon">📱</div>
+    <h3>Mobile</h3>
+    <p>Apps for Android and iOS — the essentials you actually need.</p>
+    <span class="platform-arrow">Browse →</span>
+  </a>
+</div>
+
+<script>
+  // Prevent clicks on placeholder links
+  document.querySelectorAll('.platform[href="#"], .btn[href="#"]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      if (el.getAttribute('href') === '#') {
+        e.preventDefault();
+        alert('Coming soon — files are being prepared.');
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
