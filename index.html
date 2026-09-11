@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ORGANIX</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root {
     --bg: #08080a;
@@ -62,6 +63,13 @@
     animation: fadeUp 0.8s 0.15s ease both;
   }
 
+  /* Sign-in wrap */
+  #signin-wrap {
+    animation: fadeUp 0.8s 0.3s ease both;
+    display: flex; justify-content: center;
+  }
+
+  /* Fallback button (shown if Google button fails to load) */
   .btn {
     display: inline-flex; align-items: center; gap: 10px;
     padding: 15px 36px;
@@ -71,11 +79,31 @@
     color: #fff;
     box-shadow: 0 8px 32px rgba(90, 130, 255, 0.4);
     transition: transform 0.25s, box-shadow 0.25s;
-    animation: fadeUp 0.8s 0.3s ease both;
     cursor: pointer;
+    border: none; font-family: inherit;
   }
   .btn:hover { transform: translateY(-3px); box-shadow: 0 14px 44px rgba(90, 130, 255, 0.6); }
   .btn:active { transform: translateY(-1px); }
+
+  /* Signed-in card */
+  #signed-in { display: none; animation: fadeUp 0.5s ease both; }
+  .user-card {
+    display: inline-flex; align-items: center; gap: 14px;
+    padding: 12px 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    margin-bottom: 8px;
+  }
+  .user-card img { width: 36px; height: 36px; border-radius: 50%; }
+  .user-card .u-text { text-align: left; }
+  .user-card .u-name { font-weight: 700; font-size: 14px; }
+  .user-card .u-email { font-size: 12px; color: var(--muted); }
+  .signout {
+    margin-left: 12px; font-size: 12px; color: var(--accent);
+    cursor: pointer; font-weight: 600; user-select: none;
+  }
+  .signout:hover { text-decoration: underline; }
 
   /* Section tiles */
   .platforms {
@@ -86,6 +114,12 @@
     max-width: 660px;
     margin-top: 56px;
     animation: fadeUp 0.8s 0.45s ease both;
+    transition: margin-top 0.3s;
+  }
+  .platforms.locked {
+    filter: blur(6px);
+    opacity: 0.35;
+    pointer-events: none;
   }
   .platform {
     background: var(--card);
@@ -121,17 +155,8 @@
     font-size: 24px;
     margin-bottom: 18px;
   }
-  .platform h3 {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 6px;
-    letter-spacing: -0.3px;
-  }
-  .platform p {
-    font-size: 13.5px;
-    color: var(--muted);
-    line-height: 1.55;
-  }
+  .platform h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.3px; }
+  .platform p { font-size: 13.5px; color: var(--muted); line-height: 1.55; }
   .platform-arrow {
     display: inline-flex; align-items: center; gap: 6px;
     margin-top: 16px;
@@ -163,9 +188,40 @@
 
 <div class="logo">ORGANIX</div>
 <p class="sub">All apps that are essential for PC / Mobile available here.</p>
-<a href="#" class="btn">Get Started →</a>
 
-<div class="platforms">
+<!-- ============ SIGN IN AREA ============ -->
+<!-- Shown before sign in -->
+<div id="signin-wrap">
+  <!-- Google's official button (loads if Client ID is set) -->
+  <div id="g_id_onload"
+       data-client_id="PASTE_YOUR_GOOGLE_CLIENT_ID_HERE.apps.googleusercontent.com"
+       data-callback="handleCredentialResponse"
+       data-auto_prompt="false">
+  </div>
+  <div class="g_id_signin"
+       data-type="standard"
+       data-size="large"
+       data-theme="filled_black"
+       data-text="continue_with"
+       data-shape="pill"
+       data-logo_alignment="left">
+  </div>
+</div>
+
+<!-- Shown after sign in -->
+<div id="signed-in">
+  <div class="user-card">
+    <img id="u-avatar" src="" alt="" referrerpolicy="no-referrer">
+    <div class="u-text">
+      <div class="u-name" id="u-name"></div>
+      <div class="u-email" id="u-email"></div>
+    </div>
+    <span class="signout" onclick="signOut()">Sign out</span>
+  </div>
+</div>
+
+<!-- ============ PLATFORM TILES (blurred until sign-in) ============ -->
+<div class="platforms locked" id="platforms">
   <a href="#" class="platform" data-platform="pc">
     <div class="platform-icon">💻</div>
     <h3>PC</h3>
@@ -181,13 +237,64 @@
 </div>
 
 <script>
-  // Prevent clicks on placeholder links
-  document.querySelectorAll('.platform[href="#"], .btn[href="#"]').forEach(el => {
-    el.addEventListener('click', (e) => {
-      if (el.getAttribute('href') === '#') {
-        e.preventDefault();
-        alert('Coming soon — files are being prepared.');
+  // ============ GOOGLE SIGN-IN ============
+  function handleCredentialResponse(response) {
+    // Decode the JWT payload (middle base64 segment)
+    const payload = JSON.parse(atob(response.credential.split('.')[1]));
+
+    // Swap UI: hide sign-in, show user card, unlock tiles
+    document.getElementById('signin-wrap').style.display = 'none';
+    document.getElementById('signed-in').style.display = 'block';
+    document.getElementById('platforms').classList.remove('locked');
+
+    // Fill in user info
+    document.getElementById('u-avatar').src = payload.picture || '';
+    document.getElementById('u-name').textContent = payload.name || 'User';
+    document.getElementById('u-email').textContent = payload.email || '';
+
+    // Remember for this browser tab session
+    sessionStorage.setItem('organix_user', JSON.stringify({
+      name: payload.name,
+      email: payload.email,
+      picture: payload.picture
+    }));
+  }
+
+  function signOut() {
+    sessionStorage.removeItem('organix_user');
+    location.reload();
+  }
+
+  // ============ RESTORE SESSION ON LOAD ============
+  window.addEventListener('load', () => {
+    // If the Google button didn't render (no Client ID set), show a plain fallback
+    setTimeout(() => {
+      const gbtn = document.querySelector('.g_id_signin');
+      if (gbtn && gbtn.innerHTML.trim() === '' && !sessionStorage.getItem('organix_user')) {
+        // Google button failed to load — replace with a message
+        document.getElementById('signin-wrap').innerHTML =
+          '<button class="btn" onclick="alert(\'Google sign-in needs a Client ID. Add it in the code.\')">Continue with Google →</button>';
       }
+    }, 1500);
+
+    // If user already signed in this session, restore the signed-in view
+    const saved = sessionStorage.getItem('organix_user');
+    if (saved) {
+      const u = JSON.parse(saved);
+      document.getElementById('signin-wrap').style.display = 'none';
+      document.getElementById('signed-in').style.display = 'block';
+      document.getElementById('platforms').classList.remove('locked');
+      document.getElementById('u-avatar').src = u.picture || '';
+      document.getElementById('u-name').textContent = u.name || 'User';
+      document.getElementById('u-email').textContent = u.email || '';
+    }
+  });
+
+  // ============ PLACEHOLDER TILE CLICKS ============
+  document.querySelectorAll('.platform[href="#"]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.preventDefault();
+      alert('Coming soon — files are being prepared.');
     });
   });
 </script>
